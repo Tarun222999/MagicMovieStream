@@ -15,8 +15,8 @@ func main() {
 		c.String(200, "Hello, MagicStreamMovies!")
 	})
 
-	routes.SetUpProtectedRoutes(router)
 	routes.SetupUnProtectedRoutes(router)
+	routes.SetupProtectedRoutes(router)
 	if err := router.Run(":8080"); err != nil {
 		fmt.Println("Failed to Start Server", err)
 	}
