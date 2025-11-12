@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func DBInstance() *mongo.Client {
+func Connect() *mongo.Client {
 	err := godotenv.Load(".env")
 
 	if err != nil {
@@ -38,9 +38,7 @@ func DBInstance() *mongo.Client {
 
 }
 
-var Client *mongo.Client = DBInstance()
-
-func OpenCollection(collectionName string) *mongo.Collection {
+func OpenCollection(collectionName string, client *mongo.Client) *mongo.Collection {
 	err := godotenv.Load(".env")
 
 	if err != nil {
@@ -53,13 +51,13 @@ func OpenCollection(collectionName string) *mongo.Collection {
 		log.Fatal("DATABASE_NAME not set!")
 	}
 
-	if Client == nil {
+	if client == nil {
 		log.Fatal("MongoDB client is not initialized")
 	}
 
 	fmt.Println("DATABASE_NAME:", databaseName)
 
-	collection := Client.Database(databaseName).Collection(collectionName)
+	collection := client.Database(databaseName).Collection(collectionName)
 
 	if collection == nil {
 
