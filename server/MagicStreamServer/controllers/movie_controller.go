@@ -108,6 +108,19 @@ func AddMovie() gin.HandlerFunc {
 
 func AdminReviewUpdate() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		role, err := utils.GetRoleFromContext(c)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Role not found in  context"})
+			return
+		}
+
+		if role != "ADMIN" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User must be part of the ADMIN role"})
+			return
+		}
+
 		movieId := c.Param("imdb_id")
 
 		if movieId == "" {
@@ -272,6 +285,7 @@ func GetRecommendedMovies() gin.HandlerFunc {
 
 		if err != nil {
 			log.Println("Warning: .env file not found")
+
 		}
 
 		var recommendedMovieLimitVal int64 = 5
@@ -286,11 +300,13 @@ func GetRecommendedMovies() gin.HandlerFunc {
 
 		findOptions.SetSort(bson.D{{Key: "ranking.ranking_value", Value: 1}})
 
-		c.JSON(http.StatusOK, favourite_genres)
-
 		findOptions.SetLimit(recommendedMovieLimitVal)
 
-		filter := bson.M{"genre.genre_name": bson.M{"$in": favourite_genres}}
+		filter := bson.D{
+			{Key: "genre.genre_name", Value: bson.D{
+				{Key: "$in", Value: favourite_genres},
+			}},
+		}
 
 		var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 		defer cancel()
@@ -307,6 +323,7 @@ func GetRecommendedMovies() gin.HandlerFunc {
 
 		if err := cursor.All(ctx, &recommendedMovies); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 
 		c.JSON(http.StatusOK, recommendedMovies)
@@ -318,7 +335,7 @@ func GetUsersFavouriteGenres(userId string) ([]string, error) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
-	filter := bson.M{"user_id": userId}
+	filter := bson.D{{Key: "user_id", Value: userId}}
 
 	projection := bson.M{
 		"favourite_genres.genre_name": 1,
@@ -358,5 +375,4 @@ func GetUsersFavouriteGenres(userId string) ([]string, error) {
 	}
 
 	return genreNames, nil
-
 }
