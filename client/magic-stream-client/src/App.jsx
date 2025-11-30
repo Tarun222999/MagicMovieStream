@@ -1,33 +1,55 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
 import './App.css'
-
+import { Header } from './components/header/Header'
+import Home from './components/home/Home'
+import Register from './components/register/Register'
+import Login from './components/login/Login'
+import { Route, Routes, useNavigate } from 'react-router-dom'
+import Layout from './components/Layout'
+import RequiredAuth from './components/RequiredAuth'
+import Recommended from './components/recommended/Recommended'
+import Review from './components/review/Review'
+import Stream from './components/stream/Stream'
+import useAuth from './hooks/useAuth'
+import axiosClient from './api/axiosConfig'
 function App() {
-  const [count, setCount] = useState(0)
 
+  const { auth, setAuth } = useAuth()
+  const naviagte = useNavigate();
+
+
+  const updateMovieReview = (imdb_id) => {
+    naviagte(`/review/${imdb_id}`)
+  }
+
+  const handleLogout = async () => {
+
+    try {
+      const response = await axiosClient.post("/logout", { user_id: auth.user_id });
+      console.log(response.data);
+      setAuth(null);
+      localStorage.removeItem('user');
+      console.log('User logged out');
+
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+
+  };
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Header handleLogout={handleLogout} />
+      <Routes path="">
+        <Route path='/' element={<Home updateMovieReview={updateMovieReview} />}></Route>
+        <Route path='/register' element={<Register />}></Route>
+        <Route path='/login' element={<Login />}></Route>
+        <Route element={<RequiredAuth />}>
+          <Route path='/recommended' element={<Recommended />}></Route>
+          <Route path='/review/:imdb_id' element={<Review />}></Route>
+          <Route path='/stream/:yt_id' element={<Stream />}></Route>
+        </Route>
+      </Routes>
+
     </>
   )
 }

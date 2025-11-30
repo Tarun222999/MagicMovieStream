@@ -152,8 +152,8 @@ func LoginUser(client *mongo.Client) gin.HandlerFunc {
 			Email:           foundUser.Email,
 			Role:            foundUser.Role,
 			FavouriteGenres: foundUser.FavouriteGenres,
-			Token:           token,
-			RefreshToken:    refreshToken,
+			//	Token:           token,
+			//	RefreshToken:    refreshToken,
 		})
 	}
 }

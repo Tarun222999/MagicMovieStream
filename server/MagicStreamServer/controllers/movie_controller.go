@@ -216,7 +216,7 @@ func GetReviewRanking(admin_review string, client *mongo.Client, c *gin.Context)
 		return "", 0, errors.New("could not read open api key ")
 	}
 
-	llm, err := openai.New(openai.WithToken(OpenApiKey), openai.WithModel("text-ada-001"))
+	llm, err := openai.New(openai.WithToken(OpenApiKey), openai.WithModel("gpt-3.5-turbo"))
 
 	if err != nil {
 		return "", 0, err
@@ -228,6 +228,7 @@ func GetReviewRanking(admin_review string, client *mongo.Client, c *gin.Context)
 	response, err := llm.Call(c, base_prompt+admin_review)
 
 	if err != nil {
+		fmt.Println("llm char done", err)
 		return "", 0, err
 	}
 
