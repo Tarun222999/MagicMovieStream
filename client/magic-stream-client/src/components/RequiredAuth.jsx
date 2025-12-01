@@ -4,6 +4,8 @@ import Spinner from './spinner/Spinner'
 
 const RequiredAuth = () => {
     const { auth, loading } = useAuth();
+
+    console.log(auth, "auth found")
     const location = useLocation();
 
     if (loading) {
